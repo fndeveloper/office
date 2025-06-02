@@ -1,85 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Fasih-Nasir | QR Code Attendance System</title>
+    <meta charset="UTF-8" />
+    <title>Fasih-Nasir | QR Code Attendance System</title><meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Fasih Nasir | Office Attendance">
+<meta name="twitter:description" content="QR-based attendance and ID card system.">
+<meta name="twitter:image" content="https://fasihnasiroffice.netlify.app/assets/images/icon.png">
+<meta name="twitter:image:alt" content="Fasih Nasir Icon">
     <link rel="shortcut icon" href="assets/images/icon.png" type="image/x-icon">
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/html5-qrcode"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
 </head>
+
 <body>
 
-  <h2 style="text-align:center;">QR Code Attendance</h2>
-  <div id="reader"></div>
-  <div id="result">Scan a QR Code...</div>
-  <button class="btn_generate">
-    <a href="qrocde.html" class="text-white text-decoration-none text-decoration-none">
-        Generate ID Card
-    </a>
-  </button>
+    <h2 style="text-align:center;">QR Code Attendance</h2>
+    <div id="reader"></div>
+    <div id="result">Scan a QR Code...</div>
+    <button class="btn_generate">
+        <a href="qrocde.html" class="text-white text-decoration-none text-decoration-none">
+            Generate ID Card
+        </a>
+    </button>
 
-<script>
-  const html5QrCode = new Html5Qrcode("reader");
+    <script>
+        const html5QrCode = new Html5Qrcode("reader");
 
-  function onScanSuccess(decodedText, decodedResult) {
-    document.getElementById("result").innerText = `Scanned: ${decodedText}`;
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById("result").innerText = `Scanned: ${decodedText}`;
 
-    // Stop scanning while processing
-    html5QrCode.stop().then(() => {
-      // Apna deployed Apps Script URL yahan lagao
-      const scriptURL = "https://script.google.com/macros/s/AKfycbzyiaVnCv-C4OhtlEh6KHJx6AppXvRopb8bV1ShaFYdc3q_GAF1KVRU9cWT8fVjS0KCNw/exec";
+            // Stop scanning while processing
+            html5QrCode.stop().then(() => {
+                // Apna deployed Apps Script URL yahan lagao
+                const scriptURL = "https://script.google.com/macros/s/AKfycbzyiaVnCv-C4OhtlEh6KHJx6AppXvRopb8bV1ShaFYdc3q_GAF1KVRU9cWT8fVjS0KCNw/exec";
 
-      const formData = new FormData();
-      formData.append('employeeId', decodedText.trim());
+                const formData = new FormData();
+                formData.append('employeeId', decodedText.trim());
 
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-      
-        
-        // alert(data.message || 'Attendance marked successfully!');
-        Swal.fire({
-  title: "Have a Good Day",
-  text: "Attendance marked successfully!",
-  icon: "success"
-});
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Error submitting attendance.');
-      })
-      .finally(() => {
-        // Thodi der baad scan dobara start karna hai
-        setTimeout(() => {
-          document.getElementById("result").innerText = "Scan a QR Code...";
-          html5QrCode.start(
+                fetch(scriptURL, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+
+
+                        // alert(data.message || 'Attendance marked successfully!');
+                        Swal.fire({
+                            title: "Have a Good Day",
+                            text: "Attendance marked successfully!",
+                            icon: "success"
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error submitting attendance.');
+                    })
+                    .finally(() => {
+                        // Thodi der baad scan dobara start karna hai
+                        setTimeout(() => {
+                            document.getElementById("result").innerText = "Scan a QR Code...";
+                            html5QrCode.start(
+                                { facingMode: "environment" },
+                                { fps: 10, qrbox: 250 },
+                                onScanSuccess
+                            );
+                        }, 2000);
+                    });
+            }).catch(err => {
+                console.error("Failed to stop scanning:", err);
+            });
+        }
+
+        // Page load par scan start karo
+        html5QrCode.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             onScanSuccess
-          );
-        }, 2000);
-      });
-    }).catch(err => {
-      console.error("Failed to stop scanning:", err);
-    });
-  }
+        ).catch(err => {
+            document.getElementById("result").innerText = "Camera Error: " + err;
+        });
+    </script>
+    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
 
-  // Page load par scan start karo
-  html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    onScanSuccess
-  ).catch(err => {
-    document.getElementById("result").innerText = "Camera Error: " + err;
-  });
-</script>
-<script src="app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script></body>
 </html>
