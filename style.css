@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+    body {
+     font-family: "Montserrat", sans-serif !important;
+      padding: 30px;
+      max-width: 400px;
+      color: white;
+      margin: auto;
+      text-align: center;
+      background-color: #2b2b2b;
+    }
+    input {
+        font-family: "Montserrat", sans-serif !important;
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button{
+        font-family: "Montserrat", sans-serif !important;
+    }
+   .btn_generate{
+    padding: 10px 20px;
+    font-size: small;
+    background-color: #070707 !important;
+    color: white  !important;
+    position: absolute;
+    bottom: 10px !important;
+    right: 1%;
+    border-radius: 20px;
+    border: 0;
+    
+   }
+    #idCard {
+      background-color: rgb(255, 255, 255);
+      width: 300px;
+      margin: 20px auto;
+      color: #1f1f1f !important;
+    
+      border-radius: 10px;
+      padding: 20px;
+    
+      text-align: left;
+     
+    }
+    #idCard h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    #idCard p {
+      margin: 8px 0;
+      font-size: 16px;
+    }
+    #qrcode {
+      display: block;
+      margin: 15px auto;
+      width: 200px;
+      height: 200px;
+    }
+    #downloadBtn {
+      display: none;
+      margin-top: 15px;
+      padding: 8px 20px;
+      font-size: 16px;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #downloadBtn:hover {
+      background-color: #000000;
+    }
+    #reader {
+      width: 300px;
+      margin: auto;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+    #result {
+      text-align: center;
+      font-weight: bold;
+      color: rgb(184, 184, 184);
+      margin-top: 20px;
+    }

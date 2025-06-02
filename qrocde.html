@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fasih-Nasir | Employee QR Code Generator with ID Card </title>
+  <link rel="shortcut icon" href="assets/images/icon.png" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+ 
+</head>
+<body>
+  <h2>Employee QR Code Generator with ID Card</h2>
+  <input
+    type="text"
+    id="employeeName"
+    placeholder="Enter Employee Name"
+    autocomplete="off"
+  />
+  <input
+    type="text"
+    id="employeeId"
+    placeholder="Enter Employee ID (e.g. EMP001)"
+    autocomplete="off"
+  />
+  <input
+    type="text"
+    id="employeePhone"
+    placeholder="Enter Phone Number"
+    autocomplete="off"
+  />
+  <button onclick="generateQRCode()">Generate QR Code</button>
+
+  <div id="idCard" style="display:none;">
+    <h3>Employee ID Card</h3>
+    <p><strong>Name:</strong> <span id="dispName"></span></p>
+    <p><strong>Employee ID:</strong> <span id="dispId"></span></p>
+    <p><strong>Phone:</strong> <span id="dispPhone"></span></p>
+    <div id="qrcode"></div>
+  </div>
+  <button id="downloadBtn" onclick="downloadQRCode()">Download QR Code</button>
+
+  <script>
+    let currentCanvas = null;
+
+    function generateQRCode() {
+      const name = document.getElementById('employeeName').value.trim();
+      const empId = document.getElementById('employeeId').value.trim();
+      const phone = document.getElementById('employeePhone').value.trim();
+      const qrContainer = document.getElementById('qrcode');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const idCard = document.getElementById('idCard');
+      qrContainer.innerHTML = ''; // Clear previous QR
+      downloadBtn.style.display = 'none';
+      idCard.style.display = 'none';
+
+      if (!name || !empId || !phone) {
+        alert('Please fill all fields: Name, Employee ID, and Phone Number');
+        return;
+      }
+
+      // Display employee details on ID card
+      document.getElementById('dispName').textContent = name;
+      document.getElementById('dispId').textContent = empId;
+      document.getElementById('dispPhone').textContent = phone;
+
+      QRCode.toCanvas(empId, { width: 200 }, function (error, canvas) {
+        if (error) {
+          console.error(error);
+          alert('Failed to generate QR code');
+          return;
+        }
+        currentCanvas = canvas;
+        qrContainer.appendChild(canvas);
+        downloadBtn.style.display = 'inline-block';
+        idCard.style.display = 'block';
+      });
+    }
+
+   function downloadQRCode() {
+  const idCard = document.getElementById('idCard');
+  if (!idCard) return;
+
+  html2canvas(idCard).then(canvas => {
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'employee-id-card.png';
+    link.click();
+  }).catch(err => {
+    console.error('Error capturing ID card:', err);
+  });
+}
+
+  </script>
+</body>
+</html>
