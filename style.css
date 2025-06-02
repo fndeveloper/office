@@ -47,6 +47,10 @@
       text-align: left;
      
     }
+    .bg{
+        background-color: #000000; !
+        
+    }
     #idCard h3 {
       text-align: center;
       margin-bottom: 20px;
