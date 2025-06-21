@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+    <div style="width: 500px" id="reader"></div>
+    
+    <script>
+var html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader", { fps: 10, qrbox: 250 });
+        
+function onScanSuccess(decodedText, decodedResult) {
+    console.log(decodedText,  decodedResult);
+      var json = JSON.stringify({
+        access_key: "c1a37279-9a94-43e1-8c8b-29387f558a8d", // 🔁 Replace with your Web3Forms access key
+        name: decodedText,
+message: `Scanned ID: ${decodedResult}`,
+newmsg:"thanks for your attendce succefully add",
+subject: `Attendance Marked by ${decodedText}`
+});
+     fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: json
+        })
+        .then(async (response) => {
+            let json = await response.json();
+            console.log(json);
+            
+            if (response.status == 200) {
+                alert("done")
+                // result.innerHTML = "Form submitted successfully";
+            } else {
+                console.log(response);
+                // result.innerHTML = json.message;
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            
+            // result.innerHTML = "Something went wrong!";
+        })
+        .then(function() {
+         
+            setTimeout(() => {
+                // result.style.display = "none";
+            }, 3000);
+        });
+    html5QrcodeScanner.clear();
+  
+}
+
+html5QrcodeScanner.render(onScanSuccess);
+
+    </script>
+</body>
+</html>
