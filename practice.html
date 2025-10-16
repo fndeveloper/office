@@ -1,163 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance by Hour</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <!-- Bootstrap CSS for accordion -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hour-wise Attendance</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode"></script>
 </head>
-<body class="p-3">
+<body>
+<div class="container mt-4">
+    <h2 class="mb-3">Scan Attendance</h2>
+    <div id="reader" style="width:500px;"></div>
 
-  <div class="container">
-    <h1 class="text-center mb-4">QR Attendance System</h1>
+    <h2 class="mt-5">Today's Attendance</h2>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Time</th>
+                <th>Hour</th>
+            </tr>
+        </thead>
+        <tbody id="t_body"></tbody>
+    </table>
+</div>
 
-    <div class="mb-4" id="reader" style="width:400px; margin:auto;"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-    <h3 class="mt-5 mb-3 text-center">Attendance of Today (Grouped by Hour)</h3>
-    <div class="accordion" id="attendanceAccordion"></div>
-  </div>
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
+  authDomain: "attendence-bc81d.firebaseapp.com",
+  projectId: "attendence-bc81d",
+  storageBucket: "attendence-bc81d.firebasestorage.app",
+  messagingSenderId: "804910602579",
+  appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
+  measurementId: "G-CBCKQTJ9ZM"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+// ===== QR SCANNER =====
 
-  <script type="module">
-    // ================= FIREBASE CONFIG ===================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { 
-      getFirestore, 
-      orderBy, 
-      collection, 
-      query, 
-      addDoc, 
-      onSnapshot 
-    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
-      authDomain: "attendence-bc81d.firebaseapp.com",
-      projectId: "attendence-bc81d",
-      storageBucket: "attendence-bc81d.firebasestorage.app",
-      messagingSenderId: "804910602579",
-      appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
-      measurementId: "G-CBCKQTJ9ZM"
-    };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    // =====================================================
+let html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader",
+    { fps: 10, qrbox: {width:250, height:250} },
+    false
+);
 
-    // ========== QR SCANNER SETUP ==========
-    function onScanSuccess(decodedResult) {
-      var res = JSON.parse(decodedResult);
-      console.log(res);
+function onScanSuccess(decodedResult){
+    const res = JSON.parse(decodedResult);
+  console.log(res);
+  
 
-      async function addData() {
-        try {
-          await addDoc(collection(db, "Student_id"), {
-            name: res.studentName,
-            studentID: res.studentId,
-            Time: new Date().toLocaleString()
-          });
-          console.log("Data added for:", res.studentName);
-        } catch (error) {
-          console.error("Error adding data:", error);
-        }
-      }
-      addData();
+    // Add scanned student to Firestore
+    // addDoc(collection(db, "Attendance", {
+    //     name: res.studentName,
+    //     studentID: res.studentId,
+    //     Time: Date.toString()
+    // }).then(() => {
+    //     console.log("Attendance added:", res);
+    // }).catch(err => console.log(err)))
 
-      html5QrcodeScanner.pause(true);
-      setTimeout(() => html5QrcodeScanner.resume(), 4000);
-    }
+    // html5QrcodeScanner.pause(true);
+    // setTimeout(() => html5QrcodeScanner.resume(), 3000);
+}
 
-    function onScanFailure(error) {}
+function onScanFailure(error){
+    console.log(error);
+    
+}
 
-    let html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader",
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      false
-    );
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+// Start scanner
+html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
-    // ========== DISPLAY ATTENDANCE BY HOUR ==========
-    const attendanceAccordion = document.getElementById("attendanceAccordion");
+// ===== DISPLAY ALL HOURS ATTENDANCE =====
+const t_body = document.getElementById("t_body");
 
-    const q = query(collection(db, "Student_id"), orderBy("Time", "desc"));
-
-    onSnapshot(q, (snapshot) => {
-      const records = [];
-
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        records.push(data);
-      });
-
-      // Group data by hour
-      const grouped = {};
-
-      records.forEach((item) => {
-        const time = new Date(item.Time);
-        if (isNaN(time)) return;
-
-        const hour = time.getHours();
-        const ampm = hour >= 12 ? "PM" : "AM";
-        const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-        const hourLabel = `${hour12} ${ampm}`;
-
-        if (!grouped[hourLabel]) grouped[hourLabel] = [];
-        grouped[hourLabel].push(item);
-      });
-
-      // Render accordion
-      attendanceAccordion.innerHTML = "";
-
-      Object.keys(grouped)
-        .sort((a, b) => {
-          // custom sort by hour (optional)
-          const hourA = parseInt(a);
-          const hourB = parseInt(b);
-          return hourB - hourA;
-        })
-        .forEach((hourLabel, index) => {
-          const records = grouped[hourLabel];
-          const collapseId = "collapse" + index;
-
-          let rows = records.map(
-            (r) => `
-              <tr>
-                <td>${r.studentID}</td>
-                <td>${r.name}</td>
-                <td>${r.Time}</td>
-              </tr>`
-          ).join("");
-
-          attendanceAccordion.innerHTML += `
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="heading${index}">
-                <button class="accordion-button ${index === 0 ? "" : "collapsed"}" 
-                        type="button" data-bs-toggle="collapse" 
-                        data-bs-target="#${collapseId}">
-                  🕒 ${hourLabel} Attendance
-                </button>
-              </h2>
-              <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? "show" : ""}">
-                <div class="accordion-body">
-                  <table class="table table-striped table-bordered">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Time</th>
-                      </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                  </table>
-                </div>
-              </div>
-            </div>`;
-        });
-    });
-  </script>
+</script>
 </body>
 </html>

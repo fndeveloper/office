@@ -1,15 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-    body {
-     font-family: "Montserrat", sans-serif !important;
-      padding: 30px;
-      max-width: 400px;
-      color: white;
-      margin: auto;
-      text-align: center;
-      background-color: #2b2b2b;
-    }
+/* ======== FONT FAMILY ( FUNNEL DISPLAY ) ======================= */
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+/* ======== NUNITO FAMILY ( NUNITO) */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+/* =========== ANIMATION CDN ============= */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+/* ====================== ANIMATION CDN ========================= */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+
+:root {
+    --bg1: #e6e6e6;
+    --bg2: #fcfcfc;
+    --default-color: #6ea84c;
+}
+
+body {
+    margin: 0% !important;
+    padding: 0% !important;
+    font-family: "Funnel Display", sans-serif !important;
+    background-color: var(--bg1) !important;
+    scroll-behavior: smooth !important;
+    /* overflow: hidden !important; */
+    transition: scroll-behavior 2.6s ease-in-out !important;
+}
+
     input {
-        font-family: "Montserrat", sans-serif !important;
+        font-family: "Funnel Display", sans-serif !important;
       padding: 10px;
       font-size: 16px;
       width: 80%;
@@ -21,7 +36,7 @@
       margin-right: auto;
     }
     button{
-        font-family: "Montserrat", sans-serif !important;
+        font-family: "Funnel Display", sans-serif !important;
     }
    .btn_generate{
     padding: 10px 20px;
@@ -39,7 +54,7 @@
       background-color: rgb(255, 255, 255);
       width: 300px;
       margin: 20px auto;
-      color: #1f1f1f !important;
+      /* color: #1f1f1f !important; */
     
       border-radius: 10px;
       padding: 20px;
@@ -47,10 +62,7 @@
       text-align: left;
      
     }
-    .bg{
-        background-color: #000000; !
-        
-    }
+   
     #idCard h3 {
       text-align: center;
       margin-bottom: 20px;
@@ -67,7 +79,7 @@
       height: 200px;
     }
     #downloadBtn {
-      display: none;
+      /* display: none; */
       margin-top: 15px;
       padding: 8px 20px;
       font-size: 16px;

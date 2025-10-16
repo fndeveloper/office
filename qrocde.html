@@ -1,121 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Fasih-Nasir | Employee QR Code Generator with ID Card </title><meta name="twitter:card" content="summary">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fasih Nasir | Employee QR ID Card Generator</title>
+ <!-- ✅ Bootstrap 5 CSS (Latest) -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+  
+<!-- SEO & Social -->
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Fasih Nasir | Office Attendance">
 <meta name="twitter:description" content="QR-based attendance and ID card system.">
 <meta name="twitter:image" content="https://fasihnasiroffice.netlify.app/assets/images/icon.png">
 <meta name="twitter:image:alt" content="Fasih Nasir Icon">
-  <link rel="shortcut icon" href="assets/images/icon.png" type="image/x-icon">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  
-  <link rel="stylesheet" href="style.css">
+
+<!-- Bootstrap & Libraries -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+  body {
+    background: #eef2f5;
+    font-family: "Poppins", sans-serif;
+
+    padding: 20px;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+  }
+
+  input {
+    margin: 5px auto;
+    max-width: 300px;
+  }
+.d_none{
+
+  display: none;
+}
+  .qr_card {
+    width: 350px !important;
+    /* height: 400px; */
+    background: #ffffff;
+    border-radius: 10px;
+    margin: 30px auto;
+
+   height: max-content !important;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    position: relative;
+  }
+.displays{
+  display: block !important;
+}
  
+  .btn-custom {
+    margin: 10px;
+  }
+</style>
 </head>
 <body>
 
-    
-         
-     <h2>QR Code Generator with ID Card</h2>
-  <input
-    type="text"
-    id="employeeName"
-    placeholder="Enter Employee Name"
-    autocomplete="off"
-    class="form-control"
-  />
+<h2 class="text-center">QR Code ID Card Generator</h2>
 
-  <input
-    type="text"
-    id="employeeId"
-    placeholder="Enter Employee ID (e.g. EMP001)"
-    autocomplete="off"
-    class="form-control"
+<div class="d-flex flex-column align-items-center">
+  <input type="text" id="studentName" placeholder="Enter Name" class="form-control">
+  <input type="text" id="studentId" placeholder="Enter ID (e.g. EMP001)" class="form-control">
+  <input type="text" id="studentPhone" placeholder="Enter Phone Number" class="form-control">
+  <button onclick="generateQRCode()" class="btn btn-primary btn-custom">Generate ID Card</button>
+</div>
 
-    />
-  <input
-    class="form-control"
+<div class="qr_card p-4 d_none" id="qr_card">
+   <div id="view_qr_code" class="col-10 mx-auto qe"></div>
+  <h4 class="text-center py-3 fs-2">Student ID Card</h4>
+  <p class="fs-5"><strong>Name:</strong> <span id="dispName">---</span></p>
+  <p class="fs-5"><strong>ID:</strong> <span id="dispId">---</span></p>
+  <p class="fs-5"><strong>Phone:</strong> <span id="dispPhone">---</span></p>
+</div>
 
-    type="text"
-    id="employeePhone"
-    placeholder="Enter Phone Number"
-    autocomplete="off"
-  />
-  <button onclick="generateQRCode()" class="border-white bg-transparent text-white shadow-none p-2 px-3 borderw border-1 ">Generate QR Code</button>
- 
- 
-    <div id="idCard" style="display:none;">
-    <h3>Employee ID Card</h3>
-    <p><strong>Name:</strong> <span id="dispName"></span></p>
-    <p><strong>Employee ID:</strong> <span id="dispId"></span></p>
-    <p><strong>Phone:</strong> <span id="dispPhone"></span></p>
-    <div id="qrcode"></div>
-  </div>
-  <button id="downloadBtn" onclick="downloadQRCode()">Download QR Code</button>
+<div class="col-12 d-flex flex-row justify-content-center align-items-center">
+  <button id="downloadBtn" class=" d_none btn btn-success btn-custom mx-auto col-lg-3 rounded-3">Download ID Card (PDF)</button>
 
-   
+</div>
+
+
+
+<script>
+// ====== GENERATE QR CODE & DISPLAY INFO ======
+function generateQRCode() {
+  var name = document.getElementById("studentName").value;
+  var id = document.getElementById("studentId").value;
+  var phone = document.getElementById("studentPhone").value;
+
+  if (!name || !id || !phone) {
+    alert("Please fill in all fields.");
+    return;
+  }
+document.getElementById("qr_card").classList.add("displays");
+document.getElementById("downloadBtn").classList.add("displays");
+  // Display data on card
+  document.getElementById("dispName").textContent = name;
+  document.getElementById("dispId").textContent = id;
+  document.getElementById("dispPhone").textContent = phone;
+
+  // Generate QR code data
+  const data = JSON.stringify({ name, id, phone });
+  const qrContainer = document.getElementById("view_qr_code");
+  qrContainer.innerHTML = ""; // clear previous
+
+
+
+  new QRCode(qrContainer, {
+    text: data,
+    height:200,
 
   
-<button class="btn_generate">
-    <a href="index.html" class="text-white text-decoration-none text-decoration-none">
-        Mark Attendance
-    </a>
-  </button>
-  <script>
-    let currentCanvas = null;
-
-    function generateQRCode() {
-      const name = document.getElementById('employeeName').value.trim();
-      const empId = document.getElementById('employeeId').value.trim();
-      const phone = document.getElementById('employeePhone').value.trim();
-      const qrContainer = document.getElementById('qrcode');
-      const downloadBtn = document.getElementById('downloadBtn');
-      const idCard = document.getElementById('idCard');
-      qrContainer.innerHTML = ''; // Clear previous QR
-      downloadBtn.style.display = 'none';
-      idCard.style.display = 'none';
-
-      if (!name || !empId || !phone) {
-        alert('Please fill all fields: Name, Employee ID, and Phone Number');
-        return;
-      }
-
-      // Display employee details on ID card
-      document.getElementById('dispName').textContent = name;
-      document.getElementById('dispId').textContent = empId;
-      document.getElementById('dispPhone').textContent = phone;
-
-      QRCode.toCanvas(empId, { width: 200 }, function (error, canvas) {
-        if (error) {
-          console.error(error);
-          alert('Failed to generate QR code');
-          return;
-        }
-        currentCanvas = canvas;
-        qrContainer.appendChild(canvas);
-        downloadBtn.style.display = 'inline-block';
-        idCard.style.display = 'block';
-      });
-    }
-
-   function downloadQRCode() {
-  const idCard = document.getElementById('idCard');
-  if (!idCard) return;
-
-  html2canvas(idCard).then(canvas => {
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = 'employee-id-card.png';
-    link.click();
-  }).catch(err => {
-    console.error('Error capturing ID card:', err);
   });
 }
 
-  </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+// ====== DOWNLOAD CARD AS PDF ======
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  const element = document.getElementById("qr_card");
+  html2pdf()
+    .set({
+      margin: 0,
+      filename: `${document.getElementById("studentName").value}_card.pdf`,
+      image: { type: 'png', quality: 1 },
+      html2canvas: { scale: 4 },
+      jsPDF: { unit: 'mm', format: "A6", orientation: 'portrait' }
+    })
+    .from(element)
+    .save();
+});
+</script>
+  <!-- ✅ Bootstrap Bundle JS (with Popper) -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+     
 </body>
 </html>
