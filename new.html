@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Attendance</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    h2 { background: #007bff; color: white; padding: 8px 12px; border-radius: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background: white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+    th { background: #f2f2f2; }
+    input, button, select { padding: 6px; margin: 4px 0; }
+    .add-form { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<h1>Attendance System</h1>
+
+<div class="add-form">
+  <input type="text" id="studentName" placeholder="Student Name">
+  <input type="text" id="studentID" placeholder="Student ID">
+  <select id="status">
+    <option value="Present">Present</option>
+    <option value="Absent">Absent</option>
+  </select>
+  <button onclick="addAttendance()">Add Attendance</button>
+</div>
+
+<div id="attendanceTables"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
+    authDomain: "attendence-bc81d.firebaseapp.com",
+    projectId: "attendence-bc81d",
+    storageBucket: "attendence-bc81d.firebasestorage.app",
+    messagingSenderId: "804910602579",
+    appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  function addAttendance() {
+    const name = document.getElementById('studentName').value.trim();
+    const studentID = document.getElementById('studentID').value.trim();
+    const status = document.getElementById('status').value;
+
+    if (!name || !studentID) return alert("Enter both name and ID");
+
+    const now = new Date();
+    db.collection("attendance").add({
+      studentID, name, status,
+      timestamp: now.toISOString(),
+      hour: now.getHours(), // store hour for easy grouping
+      date: now.toISOString().split('T')[0] // YYYY-MM-DD
+    });
+
+    document.getElementById('studentName').value = '';
+    document.getElementById('studentID').value = '';
+    setTimeout(loadAttendance, 300);
+  }
+
+  function loadAttendance() {
+    const container = document.getElementById('attendanceTables');
+    container.innerHTML = '';
+
+    db.collection("attendance").orderBy("timestamp").get().then(snapshot => {
+      const records = snapshot.docs.map(d => d.data());
+
+      // Group by date and hour
+      const grouped = {};
+      records.forEach(r => {
+        const key = `${r.date} | Hour: ${r.hour}:00 - ${r.hour}:59`;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(r);
+      });
+
+      Object.keys(grouped).sort().forEach(group => {
+        const records = grouped[group];
+
+        const h2 = document.createElement('h2');
+        h2.textContent = `Attendance for ${group}`;
+        container.appendChild(h2);
+
+        const table = document.createElement('table');
+        let html = `<tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>`;
+
+        records.forEach(r => {
+          html += `<tr>
+            <td>${r.studentID}</td>
+            <td>${r.name}</td>
+            <td>${r.status}</td>
+            <td>${new Date(r.timestamp).toLocaleTimeString()}</td>
+          </tr>`;
+        });
+
+        table.innerHTML = html;
+        container.appendChild(table);
+      });
+    });
+  }
+
+  loadAttendance();
+</script>
+
+</body>
+</html>
