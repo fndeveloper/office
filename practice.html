@@ -28,7 +28,8 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot,collectionGroup, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { listCollections } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 // ===== FIREBASE CONFIG =====
 const firebaseConfig = {
@@ -58,7 +59,6 @@ function onScanSuccess(decodedResult){
   console.log(res);
   
 
-    // Add scanned student to Firestore
     // addDoc(collection(db, "Attendance", {
     //     name: res.studentName,
     //     studentID: res.studentId,
@@ -81,6 +81,36 @@ html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
 // ===== DISPLAY ALL HOURS ATTENDANCE =====
 const t_body = document.getElementById("t_body");
+async function getAllDaySubcollections() {
+  console.log("🔍 Fetching all subcollections under /Attendance/day ...");
+
+  try {
+    // ✅ Step 1: Reference to document /Attendance/day
+    const dayDocRef = doc(db, "Attendance", "day");
+
+    // ✅ Step 2: List all subcollections (like 15, 16, 17...)
+    const subcollections = await listCollections(dayDocRef);
+
+    if (subcollections.length === 0) {
+      console.warn("⚠️ No subcollections found under /Attendance/day");
+      return;
+    }
+
+    // ✅ Step 3: Loop through each subcollection and log documents
+    for (const subcol of subcollections) {
+      console.log(`📁 Found subcollection: ${subcol.id}`);
+
+      const snapshot = await getDocs(subcol);
+      snapshot.forEach((docSnap) => {
+        console.log(`📘 [Day: ${subcol.id}] -> ${docSnap.id}`, docSnap.data());
+      });
+    }
+  } catch (error) {
+    console.error("❌ Error fetching data:", error);
+  }
+}
+
+getAllDaySubcollections();
 
 </script>
 </body>

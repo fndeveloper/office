@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📅 Manual Attendance System (Grouped by Date)</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fa;
+      padding: 30px;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .form-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin-bottom: 30px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .date-heading {
+      background: #2c3e50;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📋 Student Attendance (Manual Input)</h1>
+
+  <div class="form-box">
+    <input type="text" id="studentName" placeholder="Enter Student Name" />
+    <input type="text" id="studentId" placeholder="Enter Student ID" />
+    <button id="markAttendanceBtn">✅ Mark Attendance</button>
+  </div>
+
+  <h3>All Attendance Records (Grouped by Date)</h3>
+  <div id="attendanceContainer">
+    <p>Loading data...</p>
+  </div>
+
+  <!-- ========== FIREBASE CODE ========== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      collectionGroup 
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    // ======== FIREBASE CONFIG ========
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
+      authDomain: "attendence-bc81d.firebaseapp.com",
+      projectId: "attendence-bc81d",
+      storageBucket: "attendence-bc81d.firebasestorage.app",
+      messagingSenderId: "804910602579",
+      appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
+      measurementId: "G-CBCKQTJ9ZM"
+    };
+
+    // ======== INITIALIZE FIREBASE ========
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ✅ MARK ATTENDANCE (Stores under /Attendance/<Date>/Students)
+    async function markAttendance() {
+      const name = document.getElementById("studentName").value.trim();
+      const id = document.getElementById("studentId").value.trim();
+
+      if (!name || !id) {
+        alert("⚠️ Please fill in both fields!");
+        return;
+      }
+
+      const today = new Date();
+      const dateKey = today.toISOString().split("T")[0]; // e.g. "2025-10-18"
+      const attendanceCollection = collection(db, "Attendance", dateKey, "Students");
+
+      try {
+        await addDoc(attendanceCollection, {
+          studentName: name,
+          studentID: id,
+          time: today.toLocaleTimeString(),
+          timestamp: new Date()
+        });
+        alert(`✅ Attendance marked for ${name} (${dateKey})`);
+        getAllAttendance();
+      } catch (error) {
+        console.error("❌ Error saving attendance:", error);
+      }
+    }
+
+    document.getElementById("markAttendanceBtn").addEventListener("click", markAttendance);
+
+    // ✅ FETCH ALL ATTENDANCE (Grouped by Date)
+    async function getAllAttendance() {
+      const container = document.getElementById("attendanceContainer");
+      container.innerHTML = "<p>Loading...</p>";
+
+      try {
+        const querySnap = await getDocs(collectionGroup(db, "Students"));
+        const groupedData = {};
+
+        querySnap.forEach(doc => {
+          const pathParts = doc.ref.path.split("/"); // e.g. ["Attendance","2025-10-18","Students","abc123"]
+          const date = pathParts[1];
+          const data = doc.data();
+
+          if (!groupedData[date]) groupedData[date] = [];
+          groupedData[date].push(data);
+        });
+
+        const dates = Object.keys(groupedData).sort((a, b) => b.localeCompare(a));
+
+        if (dates.length === 0) {
+          container.innerHTML = "<p>No attendance records yet.</p>";
+          return;
+        }
+
+        container.innerHTML = "";
+        dates.forEach(date => {
+          const records = groupedData[date];
+
+          const tableHTML = `
+            <div class="date-heading">📅 ${date}</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>ID</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${records.map(r => `
+                  <tr>
+                    <td>${r.studentName}</td>
+                    <td>${r.studentID}</td>
+                    <td>${r.time}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `;
+          container.innerHTML += tableHTML;
+        });
+
+      } catch (err) {
+        console.error("❌ Error fetching data:", err);
+        container.innerHTML = "<p>Error loading data.</p>";
+      }
+    }
+
+    // Load data on startup
+    getAllAttendance();
+  </script>
+</body>
+</html>
