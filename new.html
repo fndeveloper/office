@@ -21,98 +21,93 @@
 <div class="add-form">
   <input type="text" id="studentName" placeholder="Student Name">
   <input type="text" id="studentID" placeholder="Student ID">
-  <select id="status">
-    <option value="Present">Present</option>
-    <option value="Absent">Absent</option>
-  </select>
-  <button onclick="addAttendance()">Add Attendance</button>
-</div>
 
+  <button id="add">Add Attendance</button>
+</div>
 <div id="attendanceTables"></div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
-    authDomain: "attendence-bc81d.firebaseapp.com",
-    projectId: "attendence-bc81d",
-    storageBucket: "attendence-bc81d.firebasestorage.app",
-    messagingSenderId: "804910602579",
-    appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
+  authDomain: "attendence-bc81d.firebaseapp.com",
+  projectId: "attendence-bc81d",
+  storageBucket: "attendence-bc81d.firebasestorage.app",
+  messagingSenderId: "804910602579",
+  appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
+};
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  function addAttendance() {
-    const name = document.getElementById('studentName').value.trim();
-    const studentID = document.getElementById('studentID').value.trim();
-    const status = document.getElementById('status').value;
+// ================== ADD ATTENDANCE ==================
+document.getElementById("add").addEventListener("click", async () => {
+  const name = document.getElementById('studentName').value.trim();
+  const studentID = document.getElementById('studentID').value.trim();
+  if (!name || !studentID) return alert("Enter both name and ID");
 
-    if (!name || !studentID) return alert("Enter both name and ID");
+  await addDoc(collection(db, "cities"), {
+    student_name: name,
+    country: studentID,
+    time: new Date().toString()
+  });
 
-    const now = new Date();
-    db.collection("attendance").add({
-      studentID, name, status,
-      timestamp: now.toISOString(),
-      hour: now.getHours(), // store hour for easy grouping
-      date: now.toISOString().split('T')[0] // YYYY-MM-DD
+  alert("Attendance added!");
+  document.getElementById('studentName').value = '';
+  document.getElementById('studentID').value = '';
+});
+
+// ================== GET DATA & CREATE DATE TABLES ==================
+function getData() {
+  const attendanceDiv = document.getElementById("attendanceTables");
+
+  onSnapshot(collection(db, "cities"), (snapshot) => {
+    const groupedByDate = {};
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      // Extract date part only (first 4 parts of string)
+      const dateStr = data.time.split(" ").slice(0,4).join(" "); // e.g. "Wed Oct 15 2025"
+      if (!groupedByDate[dateStr]) groupedByDate[dateStr] = [];
+      groupedByDate[dateStr].push(data);
     });
 
-    document.getElementById('studentName').value = '';
-    document.getElementById('studentID').value = '';
-    setTimeout(loadAttendance, 300);
-  }
+    // Clear previous tables
+    attendanceDiv.innerHTML = "";
 
-  function loadAttendance() {
-    const container = document.getElementById('attendanceTables');
-    container.innerHTML = '';
+    // Loop through each date and create table
+    Object.keys(groupedByDate).sort().forEach(date => {
+      const table = document.createElement("table");
 
-    db.collection("attendance").orderBy("timestamp").get().then(snapshot => {
-      const records = snapshot.docs.map(d => d.data());
+      // Table header
+      table.innerHTML = `
+        <thead>
+          <tr><th colspan="3" style="background:#007bff;color:white;padding:5px">${date}</th></tr>
+          <tr>
+            <th style="border:1px solid #ddd;padding:5px">Student Name</th>
+            <th style="border:1px solid #ddd;padding:5px">Student ID</th>
+            <th style="border:1px solid #ddd;padding:5px">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${groupedByDate[date].map(item => `
+            <tr>
+              <td style="border:1px solid #ddd;padding:5px">${item.student_name}</td>
+              <td style="border:1px solid #ddd;padding:5px">${item.country}</td>
+              <td style="border:1px solid #ddd;padding:5px">${new Date(item.time).toLocaleTimeString()}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
 
-      // Group by date and hour
-      const grouped = {};
-      records.forEach(r => {
-        const key = `${r.date} | Hour: ${r.hour}:00 - ${r.hour}:59`;
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(r);
-      });
-
-      Object.keys(grouped).sort().forEach(group => {
-        const records = grouped[group];
-
-        const h2 = document.createElement('h2');
-        h2.textContent = `Attendance for ${group}`;
-        container.appendChild(h2);
-
-        const table = document.createElement('table');
-        let html = `<tr>
-          <th>Student ID</th>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Time</th>
-        </tr>`;
-
-        records.forEach(r => {
-          html += `<tr>
-            <td>${r.studentID}</td>
-            <td>${r.name}</td>
-            <td>${r.status}</td>
-            <td>${new Date(r.timestamp).toLocaleTimeString()}</td>
-          </tr>`;
-        });
-
-        table.innerHTML = html;
-        container.appendChild(table);
-      });
+      attendanceDiv.appendChild(table);
     });
-  }
+  });
+}
 
-  loadAttendance();
+getData();
 </script>
 
 </body>
