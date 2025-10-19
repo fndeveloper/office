@@ -63,7 +63,9 @@
 </head>
 <body>
 
-<h2 class="text-center">QR Code ID Card Generator</h2>
+  <div class="container-fluid d-flex flex-lg-row flex-column justify-content-center align-items-center">
+<div class="col-lg-6 col-12">
+  <h2 class="text-center">QR Code ID Card Generator</h2>
 
 <div class="d-flex flex-column align-items-center">
   <input type="text" id="studentName" placeholder="Enter Name" class="form-control">
@@ -72,7 +74,9 @@
   <button onclick="generateQRCode()" class="btn btn-primary btn-custom">Generate ID Card</button>
 </div>
 
-<div class="qr_card p-4 d_none" id="qr_card">
+</div>
+<div class="col-lg-6 col-12">
+  <div class="qr_card p-4 d_none" id="qr_card">
    <div id="view_qr_code" class="col-10 mx-auto qe"></div>
   <h4 class="text-center py-3 fs-2">Student ID Card</h4>
   <p class="fs-5"><strong>Name:</strong> <span id="dispName">---</span></p>
@@ -84,6 +88,10 @@
   <button id="downloadBtn" class=" d_none btn btn-success btn-custom mx-auto col-lg-3 rounded-3">Download ID Card (PDF)</button>
 
 </div>
+
+</div>
+  </div>
+
 
 
 
