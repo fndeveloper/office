@@ -2,85 +2,86 @@
 <html lang="en">
 
 <head>
-  <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Favicon -->
   <link rel="shortcut icon" href="https://fasih-nasir.netlify.app/img/images.png" type="image/x-icon">
 
-  <!-- ✅ HTML5 QR Code Library -->
+  <!-- HTML5 QR Code Library -->
   <script src="https://unpkg.com/html5-qrcode"></script>
- 
-
 
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Font Awesome CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
   <!-- Swiper CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
-   <link rel="stylesheet" href="css/style.css">
-  <title>Dashboard | LMS BY Fasih </title>
+
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+  <title>Dashboard | LMS BY Fasih</title>
+
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+    .accordion-button::after {
+      font-size: 1rem;
+    }
+    .download-btn {
+      float: right;
+    }
+  </style>
 </head>
 
 <body>
-  
 
   <!-- =============== MAIN CODE START =========== -->
-   <section>
-    <div class="container-fluid">
-      <div class="row  ">
+  <section>
+    <div class="container-fluid  h_97vh bg-white">
+      <div class="row">
         <!-- ===== COL-3 CODE START ======== -->
-        <div class="col-lg-3  h_97vh ">
-            <div id="sidebar" class="h-100"></div>
+        <div class="col-lg-3 h_97vh">
+          <div id="sidebar" class="h-100"></div>
         </div>
         <!-- ===== COL-3 CODE END ======== -->
 
-
         <!-- ===== COL-9 CODE START ======== -->
+        <div class="col-lg-9 h_97vh h-100">
+          <div class="col-12 bg-white h-100 border-radius px-2 py-3 mt-2 shadow-sm">
 
-        <div class="col-lg-9 h_97vh ">
-  <div class="col-12 bg-white h-100 border-radius px-2 py-1 mt-2">
+            <div class="container">
+              <h2 class="text-center mb-4 text-primary">Attendance Grouped by Date</h2>
+              <div class="accordion" id="container_of_table"></div>
+            </div>
 
-     <div class="container">
-    <h2 class="text-center mb-4">Attendance Grouped by Date</h2>
-    <div class="accordion" id="container_of_table"></div>
-  </div>
-  </div>        
+          </div>
         </div>
-        <!-- ===== COL-9 CODE START ======== -->
+        <!-- ===== COL-9 CODE END ======== -->
 
       </div>
     </div>
-   </section>
+  </section>
   <!-- =============== MAIN CODE END =========== -->
 
-  <!-- Bootstrap Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" ...></script>
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Swiper CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
   <!-- Swiper JS -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-  <!-- External JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  <!-- External JS -->
-  <script src="JS/app.js" type="module"></script>
+  <!-- SweetAlert -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="js/app.js" type="module"></script>
+  <!-- Firebase + Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      onSnapshot, 
-      query, 
-      orderBy 
-    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
     // ================= FIREBASE CONFIG =================
     const firebaseConfig = {
@@ -95,8 +96,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
- const container = document.getElementById("container_of_table");
-
+    const container = document.getElementById("container_of_table");
     const q = query(collection(db, "Attendance"), orderBy("time", "desc"));
 
     onSnapshot(q, (snapshot) => {
@@ -104,26 +104,29 @@
 
       snapshot.forEach((doc) => {
         const data = doc.data();
-        // 🔹 Extract date only from timestamp
+        // Group by date
         const date = new Date(data.time).toLocaleDateString();
         if (!grouped[date]) grouped[date] = [];
         grouped[date].push(data);
       });
 
-      container.innerHTML = ""; // Clear previous
+      container.innerHTML = ""; // Clear before re-rendering
 
-      // 🔹 Create Accordion per date
       Object.entries(grouped).forEach(([date, records], index) => {
         const collapseId = `collapse${index}`;
         const headingId = `heading${index}`;
+        const sectionId = `section${index}`;
 
         container.innerHTML += `
-          <div class="accordion-item mb-2">
-            <h2 class="accordion-header" id="${headingId}">
+          <div class="accordion-item mb-3" id="${sectionId}">
+            <h2 class="accordion-header d-flex justify-content-between align-items-center" id="${headingId}">
               <button class="accordion-button ${index === 0 ? "" : "collapsed"}" type="button"
                 data-bs-toggle="collapse" data-bs-target="#${collapseId}"
                 aria-expanded="${index === 0}" aria-controls="${collapseId}">
-                📅 ${date}
+                 ${date}
+              </button>
+              <button class="btn btn-sm  me-3 download-btn" onclick="downloadPDF('${sectionId}', '${date}')">
+                <i class="fa-solid fa-file-pdf"></i> Download 
               </button>
             </h2>
             <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? "show" : ""}" 
@@ -153,10 +156,21 @@
         `;
       });
     });
-  </script>
 
-  
-
+    // ================= PDF DOWNLOAD FUNCTION =================
+    window.downloadPDF = function (sectionId, date) {
+      const element = document.getElementById(sectionId);
+      html2pdf()
+        .set({
+          margin: 10,
+          filename: `Attendance_${date.replace(/\//g, "-")}.pdf`,
+          image: { type: 'jpeg', quality: 1 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        })
+        .from(element)
+        .save();
+    };
   </script>
 </body>
 
