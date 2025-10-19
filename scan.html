@@ -19,17 +19,6 @@
 
     <div id="reader" style="width:300px; margin:auto;"></div>
 
-    <h3 class="mt-5 text-center text-success">Today's Attendance</h3>
-    <table class="table table-bordered table-striped mt-3 text-center">
-      <thead class="table-dark">
-        <tr>
-          <th>Student ID</th>
-          <th>Name</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody id="t_body"></tbody>
-    </table>
   </div>
 
   <script type="module">
@@ -99,23 +88,7 @@
 
     html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
-    // ================= REAL-TIME ATTENDANCE DISPLAY =================
-    const t_body = document.getElementById("t_body");
-    const q = query(collection(db, "Attendance"), orderBy("time", "desc"));
-
-    onSnapshot(q, (snapshot) => {
-      t_body.innerHTML = "";
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        t_body.innerHTML += `
-          <tr>
-            <td>${data.studentID}</td>
-            <td>${data.name}</td>
-            <td>${data.time}</td>
-          </tr>
-        `;
-      });
-    });
+   
   </script>
 </body>
 </html>
