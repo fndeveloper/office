@@ -1,0 +1,107 @@
+/* ======== FONT FAMILY ( FUNNEL DISPLAY ) ======================= */
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+/* ======== NUNITO FAMILY ( NUNITO) */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+/* =========== ANIMATION CDN ============= */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+/* ====================== ANIMATION CDN ========================= */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+
+:root {
+    --bg1: #e6e6e6;
+    --bg2: #fcfcfc;
+    --default-color: #6ea84c;
+}
+
+body {
+    margin: 0% !important;
+    padding: 0% !important;
+    font-family: "Funnel Display", sans-serif !important;
+    background-color: var(--bg1) !important;
+    scroll-behavior: smooth !important;
+    /* overflow: hidden !important; */
+    transition: scroll-behavior 2.6s ease-in-out !important;
+}
+
+    input {
+        font-family: "Funnel Display", sans-serif !important;
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button{
+        font-family: "Funnel Display", sans-serif !important;
+    }
+   .btn_generate{
+    padding: 10px 20px;
+    font-size: small;
+    background-color: #070707 !important;
+    color: white  !important;
+    position: absolute;
+    bottom: 10px !important;
+    right: 1%;
+    border-radius: 20px;
+    border: 0;
+    
+   }
+    #idCard {
+      background-color: rgb(255, 255, 255);
+      width: 300px;
+      margin: 20px auto;
+      /* color: #1f1f1f !important; */
+    
+      border-radius: 10px;
+      padding: 20px;
+    
+      text-align: left;
+     
+    }
+   
+    #idCard h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    #idCard p {
+      margin: 8px 0;
+      font-size: 16px;
+    }
+    #qrcode {
+      display: block;
+      margin: 15px auto;
+      width: 200px;
+      height: 200px;
+    }
+    #downloadBtn {
+      /* display: none; */
+      margin-top: 15px;
+      padding: 8px 20px;
+      font-size: 16px;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #downloadBtn:hover {
+      background-color: #000000;
+    }
+    #reader {
+      width: 300px;
+      margin: auto;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+    #result {
+      text-align: center;
+      font-weight: bold;
+      color: rgb(184, 184, 184);
+      margin-top: 20px;
+    }

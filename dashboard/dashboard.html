@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="https://fasih-nasir.netlify.app/img/images.png" type="image/x-icon">
+
+  <!-- ✅ HTML5 QR Code Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+ 
+
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
+   <link rel="stylesheet" href="css/style.css">
+  <title>Dashboard | LMS BY Fasih </title>
+</head>
+
+<body>
+  
+
+  <!-- =============== MAIN CODE START =========== -->
+   <section>
+    <div class="container-fluid">
+      <div class="row  ">
+        <!-- ===== COL-3 CODE START ======== -->
+        <div class="col-lg-3  h_97vh ">
+            <div id="sidebar" class="h-100"></div>
+        </div>
+        <!-- ===== COL-3 CODE END ======== -->
+
+
+        <!-- ===== COL-9 CODE START ======== -->
+
+        <div class="col-lg-9 h_97vh ">
+  <div class="col-12 bg-white h-100 border-radius px-2 py-1 mt-2">
+
+     <div class="container">
+    <h2 class="text-center mb-4">Attendance Grouped by Date</h2>
+    <div class="accordion" id="container_of_table"></div>
+  </div>
+  </div>        
+        </div>
+        <!-- ===== COL-9 CODE START ======== -->
+
+      </div>
+    </div>
+   </section>
+  <!-- =============== MAIN CODE END =========== -->
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" ...></script>
+
+  <!-- Swiper CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+
+  <!-- External JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  <!-- External JS -->
+  <script src="JS/app.js" type="module"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      onSnapshot, 
+      query, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    // ================= FIREBASE CONFIG =================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
+      authDomain: "attendence-bc81d.firebaseapp.com",
+      projectId: "attendence-bc81d",
+      storageBucket: "attendence-bc81d.firebasestorage.app",
+      messagingSenderId: "804910602579",
+      appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+ const container = document.getElementById("container_of_table");
+
+    const q = query(collection(db, "Attendance"), orderBy("time", "desc"));
+
+    onSnapshot(q, (snapshot) => {
+      const grouped = {};
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        // 🔹 Extract date only from timestamp
+        const date = new Date(data.time).toLocaleDateString();
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(data);
+      });
+
+      container.innerHTML = ""; // Clear previous
+
+      // 🔹 Create Accordion per date
+      Object.entries(grouped).forEach(([date, records], index) => {
+        const collapseId = `collapse${index}`;
+        const headingId = `heading${index}`;
+
+        container.innerHTML += `
+          <div class="accordion-item mb-2">
+            <h2 class="accordion-header" id="${headingId}">
+              <button class="accordion-button ${index === 0 ? "" : "collapsed"}" type="button"
+                data-bs-toggle="collapse" data-bs-target="#${collapseId}"
+                aria-expanded="${index === 0}" aria-controls="${collapseId}">
+                📅 ${date}
+              </button>
+            </h2>
+            <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? "show" : ""}" 
+                 aria-labelledby="${headingId}" data-bs-parent="#container_of_table">
+              <div class="accordion-body">
+                <table class="table table-bordered table-striped text-center">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Student ID</th>
+                      <th>Name</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${records.map(r => `
+                      <tr>
+                        <td>${r.studentID}</td>
+                        <td>${r.name}</td>
+                        <td>${r.time}</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    });
+  </script>
+
+  
+
+  </script>
+</body>
+
+</html>
