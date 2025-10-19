@@ -1,119 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hour-wise Attendance</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://unpkg.com/html5-qrcode"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance System</title>
+
+  <!-- ✅ Bootstrap 5.3.3 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ✅ HTML5 QR Code Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
-<body>
-<div class="container mt-4">
-    <h2 class="mb-3">Scan Attendance</h2>
-    <div id="reader" style="width:500px;"></div>
+<body class="bg-light">
 
-    <h2 class="mt-5">Today's Attendance</h2>
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Time</th>
-                <th>Hour</th>
-            </tr>
-        </thead>
-        <tbody id="t_body"></tbody>
+  <div class="container mt-5">
+    <h2 class="mb-4 text-center text-primary">QR Attendance System</h2>
+
+    <div id="reader" style="width:300px; margin:auto;"></div>
+
+    <h3 class="mt-5 text-center text-success">Today's Attendance</h3>
+    <table class="table table-bordered table-striped mt-3 text-center">
+      <thead class="table-dark">
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="t_body"></tbody>
     </table>
-</div>
- <div class="box">
-    <input type="text" id="studentName" placeholder="Enter Student Name">
-    <input type="text" id="studentId" placeholder="Enter Student ID">
-    <button id="saveBtn">💾 Save to Firestore</button>
   </div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, setDoc,addDoc,getDoc, query, orderBy, onSnapshot, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      onSnapshot, 
+      query, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-// ===== FIREBASE CONFIG =====
-const firebaseConfig = {
-  apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
-  authDomain: "attendence-bc81d.firebaseapp.com",
-  projectId: "attendence-bc81d",
-  storageBucket: "attendence-bc81d.firebasestorage.app",
-  messagingSenderId: "804910602579",
-  appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
-  measurementId: "G-CBCKQTJ9ZM"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    // ================= FIREBASE CONFIG =================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXYuGsHV-u8HzDbBCrLDJAhTAYdSDjI8Q",
+      authDomain: "attendence-bc81d.firebaseapp.com",
+      projectId: "attendence-bc81d",
+      storageBucket: "attendence-bc81d.firebasestorage.app",
+      messagingSenderId: "804910602579",
+      appId: "1:804910602579:web:eb61bbb3a2c6b1ef1229a6",
+    };
 
-// ===== QR SCANNER =====
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
+    // ================= QR SCANNER =================
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader",
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      false
+    );
 
+    let lastScan = ""; // ✅ store last scanned QR to prevent duplicate
 
-let html5QrcodeScanner = new Html5QrcodeScanner(
-    "reader",
-    { fps: 10, qrbox: {width:250, height:250} },
-    false
-);
+    async function onScanSuccess(decodedResult) {
+      // ✅ Avoid duplicate scan entries
+      if (decodedResult === lastScan) return;
+      lastScan = decodedResult;
 
-function onScanSuccess(decodedResult){
-    const res = JSON.parse(decodedResult);
-  console.log(res);
-  
+      try {
+        const res = JSON.parse(decodedResult);
+        console.log("Scanned Data:", res);
 
-    // addDoc(collection(db, "Attendance", {
-    //     name: res.studentName,
-    //     studentID: res.studentId,
-    //     Time: Date.toString()
-    // }).then(() => {
-    //     console.log("Attendance added:", res);
-    // }).catch(err => console.log(err)))
+        await addDoc(collection(db, "Attendance"), {
+          name: res.name,
+          studentID: res.id,
+          time: new Date().toLocaleString()
+        });
 
-    // html5QrcodeScanner.pause(true);
-    // setTimeout(() => html5QrcodeScanner.resume(), 3000);
-}
+        alert("✅ Attendance Recorded Successfully!");
+      } catch (error) {
+        console.error("❌ Error adding document:", error);
+      }
 
-function onScanFailure(error){
-    console.log(error);
-    
-}
-
-// Start scanner
-html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-
-
-
-
-
-
-// ========================= NEW CODE START ===========================
-document.getElementById("save-btn").addEventListener("click",()=>{
-  var studentName = document.getElementById("studentName").value.trim();
-var studentId = document.getElementById("studentId").value.trim();
-
-
-
-})
-// ========================= NEW CODE END =============================
-
-// ===== DISPLAY ALL HOURS ATTENDANCE =====
-  async function getDayDocument() {
-    const ref = doc(db, "fasih", "day"); // 👈 path: Attendance/day
-
-    const snap = await getDoc(ref);
-
-    if (snap.exists()) {
-      console.log("✅ Day document data:", snap.data());
-    } else {
-      console.log("❌ No such document found in Attendance/day");
+      // Pause scanning for 3 seconds and then resume
+      html5QrcodeScanner.pause(true);
+      setTimeout(() => {
+        lastScan = ""; // ✅ reset last scan after 3 seconds
+        html5QrcodeScanner.resume();
+      }, 3000);
     }
-  }
 
-  getDayDocument();
+    function onScanFailure(error) {
+      console.warn("Scan failed:", error);
+    }
 
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
-</script>
+    // ================= REAL-TIME ATTENDANCE DISPLAY =================
+    const t_body = document.getElementById("t_body");
+    const q = query(collection(db, "Attendance"), orderBy("time", "desc"));
+
+    onSnapshot(q, (snapshot) => {
+      t_body.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        t_body.innerHTML += `
+          <tr>
+            <td>${data.studentID}</td>
+            <td>${data.name}</td>
+            <td>${data.time}</td>
+          </tr>
+        `;
+      });
+    });
+  </script>
 </body>
 </html>

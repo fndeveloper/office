@@ -73,6 +73,7 @@ function getData() {
       if (!groupedByDate[dateStr]) groupedByDate[dateStr] = [];
       groupedByDate[dateStr].push(data);
     });
+// console.log(groupedByDate);
 
     // Clear previous tables
     attendanceDiv.innerHTML = "";
@@ -109,6 +110,6 @@ function getData() {
 
 getData();
 </script>
-
+<script src="app.js"></script>
 </body>
 </html>
